@@ -48,14 +48,8 @@ endif()
 message(STATUS "Python include dir: ${YACMA_PYTHON_INCLUDE_DIR}")
 
 # An imported target to be used when building extension modules.
-if(_YACMA_PYTHON_MODULE_NEED_LINK)
-  add_library(YACMA::PythonModule UNKNOWN IMPORTED)
-  set_target_properties(YACMA::PythonModule PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${YACMA_PYTHON_INCLUDE_DIR}"
-    IMPORTED_LOCATION "${PYTHON_LIBRARIES}" IMPORTED_LINK_INTERFACE_LANGUAGES "C")
-else()
-  add_library(YACMA::PythonModule INTERFACE IMPORTED)
-  set_target_properties(YACMA::PythonModule PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${YACMA_PYTHON_INCLUDE_DIR}")
-endif()
+add_library(YACMA::PythonModule INTERFACE IMPORTED)
+set_target_properties(YACMA::PythonModule PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${YACMA_PYTHON_INCLUDE_DIR}")
 
 # This flag is used to signal the need to override the default extension of the Python modules
 # depending on the architecture. Under Windows, for instance, CMake produces shared objects as
@@ -142,6 +136,9 @@ function(YACMA_PYTHON_MODULE name)
       set_target_properties(${name} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
     endif()
     target_link_libraries("${name}" PRIVATE YACMA::PythonModule)
+    if(_YACMA_PYTHON_MODULE_NEED_LINK)
+      target_link_libraries("${name}" PRIVATE ${PYTHON_LIBRARIES})
+    endif()
 endfunction()
 
 # Mark as included.
